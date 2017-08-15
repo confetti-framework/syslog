@@ -6,6 +6,7 @@
 # syslog
 Syslog message formatter.
 
+
 ## Example
 ```go
 package main
