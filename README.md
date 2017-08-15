@@ -12,21 +12,17 @@ Syslog message formatter.
 package main
 
 import (
-	"bytes"
-	"fmt"
 	"github.com/szxp/syslog"
 	"log"
+	"os"
 )
 
 func main() {
 	const msg = "Start HTTP server (addr=:8080)"
 
-	buf := &bytes.Buffer{}
-	wrappedWriter := syslog.NewWriter(buf, syslog.LOG_USER|syslog.LOG_NOTICE)
+	wrappedWriter := syslog.NewWriter(os.Stdout, syslog.LOG_USER|syslog.LOG_NOTICE)
 	logger := log.New(wrappedWriter, "", 0)
 	logger.Println(msg)
-
-	fmt.Print(buf.String)
 
 	// Output is similar to this:
 	// <13>1 2017-08-15T23:13:15.33+02:00 laptop /path/to/myprogram 21650 - - Start HTTP server (addr=:8080)
