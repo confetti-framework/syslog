@@ -95,11 +95,10 @@ func (w *Writer) Write(d []byte) (n int, err error) {
 
 	if d[0] != '<' {
 		return w.out.Write(w.format(d))
-	} else {
-		// don't format a syslog message
-		return w.out.Write(d)
 	}
-	return 0, nil
+
+	// don't format a syslog message
+	return w.out.Write(d)
 }
 
 const rfc3339Milli = "2006-01-02T15:04:05.999-07:00"
