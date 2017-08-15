@@ -67,7 +67,7 @@ const (
 const version = 1 // defined in RFC 5424.
 
 // Writer generates syslog messages as defined in RFC 5424.
-type Writer struct {
+type writer struct {
 	out io.Writer
 	pri Priority
 }
@@ -80,7 +80,7 @@ func NewWriter(out io.Writer, pri Priority) io.Writer {
 		panic("syslog: invalid priority: " + strconv.Itoa(int(pri)))
 	}
 
-	return &Writer{
+	return &writer{
 		out: out,
 		pri: pri,
 	}
@@ -88,7 +88,7 @@ func NewWriter(out io.Writer, pri Priority) io.Writer {
 
 // Write generates and writes a syslog message to the
 // underlying io.Writer.
-func (w *Writer) Write(d []byte) (n int, err error) {
+func (w *writer) Write(d []byte) (n int, err error) {
 	if len(d) == 0 {
 		return 0, nil
 	}
@@ -103,7 +103,7 @@ func (w *Writer) Write(d []byte) (n int, err error) {
 
 const rfc3339Milli = "2006-01-02T15:04:05.999-07:00"
 
-func (w *Writer) format(d []byte) []byte {
+func (w *writer) format(d []byte) []byte {
 	timestamp := time.Now().Format(rfc3339Milli)
 	hostname, _ := os.Hostname()
 	appName := os.Args[0]
