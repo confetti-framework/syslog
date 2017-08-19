@@ -20,7 +20,7 @@ import (
 func main() {
 	const msg = "Start HTTP server (addr=:8080)"
 
-	wrappedWriter := syslog.NewWriter(os.Stdout, syslog.LOG_USER|syslog.LOG_NOTICE)
+	wrappedWriter := syslog.NewWriter(os.Stdout, syslog.USER|syslog.NOTICE)
 	logger := log.New(wrappedWriter, "", 0)
 	logger.Println(msg)
 
