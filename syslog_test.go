@@ -26,10 +26,11 @@ func TestWriter(t *testing.T) {
 }
 
 func TestStructuredData(t *testing.T) {
-	sd := syslog.SDElem("id1").
+	sd := syslog.StructuredData{}
+	sd.Element("id1").
 		Data("par1", "\"val1\"").
-		Data("par2", "val2").
-		SDElem("id2").
+		Data("par2", "val2")
+	sd.Element("id2").
 		Data("par1", "val1").
 		Data("par2", "val2")
 

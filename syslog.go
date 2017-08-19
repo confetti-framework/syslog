@@ -128,7 +128,7 @@ func (w *writer) format(d []byte) []byte {
 }
 
 type Logger interface {
-	Log(sev Priority, msgId string, sd *SD, format string, a ...interface{})
+	Log(sev Priority, msgId string, sd StructuredData, format string, a ...interface{})
 }
 
 func NewLogger(w io.Writer) Logger {
@@ -139,44 +139,26 @@ type logger struct {
 	w io.Writer
 }
 
-func (l *logger) Log(sev Priority, msgId string, sd *SD, format string, a ...interface{}) {
+func (l *logger) Log(sev Priority, msgId string, sd StructuredData, format string, a ...interface{}) {
 
 }
 
-func SDElem(id string) *SD {
-	return &SD{
-		elems:    make(map[string]sdElem, 1),
-		currElem: id,
-	}
-}
+type StructuredData map[string]SDElement
 
-type SD struct {
-	elems    map[string]sdElem
-	currElem string
-}
-
-type sdElem map[string]string
-
-func (b *SD) Data(name, value string) *SD {
-	elem, ok := b.elems[b.currElem]
+func (b StructuredData) Element(id string) SDElement {
+	elem, ok := b[id]
 	if !ok {
-		elem = make(sdElem, 1)
-		b.elems[b.currElem] = elem
+		elem = make(SDElement, 1)
+		b[id] = elem
 	}
-	elem[name] = value
-	return b
+	return elem
 }
 
-func (b *SD) SDElem(id string) *SD {
-	b.currElem = id
-	return b
-}
-
-func (b *SD) String() string {
+func (b StructuredData) String() string {
 	r := strings.NewReplacer(`"`, `\"`, `\`, `\\`, `]`, `\]`)
 
 	buf := &bytes.Buffer{}
-	for id, elem := range b.elems {
+	for id, elem := range b {
 		if len(elem) > 0 {
 			buf.WriteByte('[')
 			buf.WriteString(id)
@@ -190,18 +172,25 @@ func (b *SD) String() string {
 	return buf.String()
 }
 
-func Alert(l Logger, msgId string, sd *SD, format string, a ...interface{}) {
+type SDElement map[string]string
+
+func (e SDElement) Data(name, value string) SDElement {
+	e[name] = value
+	return e
+}
+
+func Alert(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
 	l.Log(ALERT, msgId, sd, format, a...)
 }
 
-func Error(l Logger, msgId string, sd *SD, format string, a ...interface{}) {
+func Error(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
 	l.Log(ERR, msgId, sd, format, a...)
 }
 
-func Info(l Logger, msgId string, sd *SD, format string, a ...interface{}) {
+func Info(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
 	l.Log(INFO, msgId, sd, format, a...)
 }
 
-func Debug(l Logger, msgId string, sd *SD, format string, a ...interface{}) {
+func Debug(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
 	l.Log(DEBUG, msgId, sd, format, a...)
 }
