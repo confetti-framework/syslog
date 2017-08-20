@@ -9,9 +9,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"os"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -68,65 +66,59 @@ const (
 
 const version = 1 // defined in RFC 5424.
 
-// Writer generates syslog messages as defined in RFC 5424.
-type writer struct {
-	out io.Writer
-	pri Priority
-}
-
 // NewWriter wrappes another io.Writer and returns a new
 // io.Writer that generates syslog messages as defined
 // in RFC 5424 and writes them to the given io.Writer.
-func NewWriter(out io.Writer, pri Priority) io.Writer {
-	if pri < 0 || pri > LOCAL7|DEBUG {
-		panic("syslog: invalid priority: " + strconv.Itoa(int(pri)))
-	}
-
+func NewWriter(out io.Writer, pri Priority, hostname, appName, procid string) io.Writer {
 	return &writer{
-		out: out,
-		pri: pri,
+		out,
+		pri,
+		hostname,
+		appName,
+		procid,
 	}
 }
 
+// Writer generates syslog messages as defined in RFC 5424.
+type writer struct {
+	out      io.Writer
+	pri      Priority
+	hostname string
+	appName  string
+	procid   string
+}
+
+var nl = []byte{'\n'}
+
 // Write generates and writes a syslog message to the
 // underlying io.Writer.
-func (w *writer) Write(d []byte) (n int, err error) {
+func (w *writer) Write(d []byte) (int, error) {
 	if len(d) == 0 {
 		return 0, nil
 	}
 
+	// don't format a syslog message
 	if d[0] != '<' {
-		return w.out.Write(w.format(d))
+		d = formatSyslog(
+			w.pri,
+			time.Now(),
+			"",
+			w.hostname,
+			w.appName,
+			w.procid,
+			"",
+			nil,
+			d)
 	}
 
-	// don't format a syslog message
-	return w.out.Write(d)
+	n, err := w.out.Write(d)
+	if d[len(d)-1] != '\n' && err == nil {
+		w.out.Write(nl)
+	}
+	return n, err
 }
 
 const rfc3339Milli = "2006-01-02T15:04:05.999-07:00"
-
-func (w *writer) format(d []byte) []byte {
-	timestamp := time.Now().Format(rfc3339Milli)
-	hostname, _ := os.Hostname()
-	appName := os.Args[0]
-	procid := os.Getpid()
-
-	buf := &bytes.Buffer{}
-	fmt.Fprintf(buf, "<%d>%d %s %s %s %d - - ",
-		w.pri,
-		version,
-		timestamp,
-		hostname,
-		appName,
-		procid,
-	)
-	buf.Write(d)
-
-	if d[len(d)-1] != '\n' {
-		buf.WriteByte('\n')
-	}
-	return buf.Bytes()
-}
 
 func formatSyslog(
 	pri Priority,
@@ -137,7 +129,7 @@ func formatSyslog(
 	procid string,
 	msgid string,
 	structData StructuredData,
-	msg string,
+	msg []byte,
 ) []byte {
 	if timeFormat == "" {
 		timeFormat = rfc3339Milli
@@ -156,7 +148,7 @@ func formatSyslog(
 	sd = defaultIfEmpty(sd, "-")
 
 	buf := &bytes.Buffer{}
-	fmt.Fprintf(buf, "<%d>%d %s %s %s %s %s %s %s",
+	fmt.Fprintf(buf, "<%d>%d %s %s %s %s %s %s ",
 		pri,
 		version,
 		ts,
@@ -165,8 +157,8 @@ func formatSyslog(
 		procid,
 		msgid,
 		sd,
-		msg,
 	)
+	buf.Write(msg)
 
 	if msg[len(msg)-1] != '\n' {
 		buf.WriteByte('\n')
@@ -207,6 +199,7 @@ type logger struct {
 }
 
 func (l *logger) Log(pri Priority, msgId string, sd StructuredData, msgFormat string, a ...interface{}) {
+	msg := fmt.Sprintf(msgFormat, a...)
 	l.w.Write(formatSyslog(
 		pri,
 		time.Now(),
@@ -216,7 +209,7 @@ func (l *logger) Log(pri Priority, msgId string, sd StructuredData, msgFormat st
 		l.procid,
 		msgId,
 		sd,
-		fmt.Sprintf(msgFormat, a...)))
+		[]byte(msg)))
 }
 
 // StructuredData provides a mechanism to express information in a well

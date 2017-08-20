@@ -7,7 +7,7 @@
 Syslog message formatter.
 
 
-## Example
+## Example Writer
 ```go
 package main
 
@@ -20,13 +20,41 @@ import (
 func main() {
 	const msg = "Start HTTP server (addr=:8080)"
 
-	wrappedWriter := syslog.NewWriter(os.Stdout, syslog.USER|syslog.NOTICE)
+	hostname := "laptop"
+	appName := "testapp"
+	procid := "123"
+	wrappedWriter := syslog.NewWriter(os.Stdout, syslog.USER|syslog.NOTICE, hostname, appName, procid)
 	logger := log.New(wrappedWriter, "", 0)
 	logger.Println(msg)
 
 	// Output is similar to this:
-	// <13>1 2017-08-15T23:13:15.33+02:00 laptop /path/to/myprogram 21650 - - Start HTTP server (addr=:8080)
+	// <13>1 2017-08-15T23:13:15.33+02:00 laptop testapp 123 - - Start HTTP server (addr=:8080)
 }
 ```
 
+
+## Example Logger
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/szxp/syslog"
+	"os"
+)
+
+func main() {
+	buf := &bytes.Buffer{}
+	l := syslog.NewLogger(buf, "hostname", "appName", "procid")
+
+	sd := syslog.StructuredData{}
+	sd.Element("id1").Set("par1", "val1")
+	l.Log(syslog.USER|syslog.ERR, "LoginFailed", sd, "login failed: %s", "username")
+
+	fmt.Print(buf.String())
+
+	// Output is similar to this:
+	// <11>1 2017-08-15T23:13:15.335+02:00 hostname appName procid LoginFailed [id1 par1="val1"] login failed: username
+}	
+```
 

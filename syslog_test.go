@@ -17,7 +17,10 @@ func TestWriter(t *testing.T) {
 	const msg = "this is the message details"
 
 	buf := &bytes.Buffer{}
-	wrappedBuf := syslog.NewWriter(buf, syslog.USER|syslog.NOTICE)
+	hostname := "laptop"
+	appName := "testapp"
+	procid := "123"
+	wrappedBuf := syslog.NewWriter(buf, syslog.USER|syslog.NOTICE, hostname, appName, procid)
 	logger := log.New(wrappedBuf, "", 0)
 	logger.Println(msg)
 
