@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-func Example_NewWriter() {
+func ExampleNewWriter() {
 	const msg = "Start HTTP server (addr=:8080)"
 
 	hostname := "laptop"
