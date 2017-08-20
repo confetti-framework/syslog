@@ -295,12 +295,28 @@ func (e SDElement) Names() []string {
 	return names
 }
 
+func Emergency(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
+	l.Log(EMERG, msgId, sd, format, a...)
+}
+
+func Critical(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
+	l.Log(CRIT, msgId, sd, format, a...)
+}
+
 func Alert(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
 	l.Log(ALERT, msgId, sd, format, a...)
 }
 
 func Error(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
 	l.Log(ERR, msgId, sd, format, a...)
+}
+
+func Warning(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
+	l.Log(WARNING, msgId, sd, format, a...)
+}
+
+func Notice(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
+	l.Log(NOTICE, msgId, sd, format, a...)
 }
 
 func Info(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
