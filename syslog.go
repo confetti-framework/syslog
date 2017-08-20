@@ -12,6 +12,7 @@ import (
 	"io"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -70,6 +71,8 @@ const version = 1 // defined in RFC 5424.
 // NewWriter wrappes another io.Writer and returns a new
 // io.Writer that generates syslog messages as defined
 // in RFC 5424 and writes them to the given io.Writer.
+// The returned io.Writer is NOT safe for concurrent use
+// by multiple goroutines.
 func NewWriter(out io.Writer, pri Priority, hostname, appName, procid string) io.Writer {
 	return &writer{
 		out,
@@ -183,8 +186,11 @@ type Logger interface {
 
 // NewLogger returns a new syslog logger that writes to
 // the specified io.Writer.
+// The returned Logger is safe for concurrent use by
+// multiple goroutines.
 func NewLogger(w io.Writer, hostname, appName, procid string) Logger {
 	return &logger{
+		sync.Mutex{},
 		w,
 		hostname,
 		appName,
@@ -193,6 +199,7 @@ func NewLogger(w io.Writer, hostname, appName, procid string) Logger {
 }
 
 type logger struct {
+	mu       sync.Mutex
 	w        io.Writer
 	hostname string
 	appName  string
@@ -200,6 +207,9 @@ type logger struct {
 }
 
 func (l *logger) Log(pri Priority, msgId string, sd StructuredData, msgFormat string, a ...interface{}) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
 	msg := fmt.Sprintf(msgFormat, a...)
 	l.w.Write(formatSyslog(
 		pri,
