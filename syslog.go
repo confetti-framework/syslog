@@ -308,33 +308,57 @@ func (e SDElement) Names() []string {
 }
 
 func Emergency(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
+	if l == nil {
+		return
+	}
 	l.Log(EMERG, msgId, sd, format, a...)
 }
 
 func Critical(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
+	if l == nil {
+		return
+	}
 	l.Log(CRIT, msgId, sd, format, a...)
 }
 
 func Alert(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
+	if l == nil {
+		return
+	}
 	l.Log(ALERT, msgId, sd, format, a...)
 }
 
 func Error(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
+	if l == nil {
+		return
+	}
 	l.Log(ERR, msgId, sd, format, a...)
 }
 
 func Warning(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
+	if l == nil {
+		return
+	}
 	l.Log(WARNING, msgId, sd, format, a...)
 }
 
 func Notice(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
+	if l == nil {
+		return
+	}
 	l.Log(NOTICE, msgId, sd, format, a...)
 }
 
 func Info(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
+	if l == nil {
+		return
+	}
 	l.Log(INFO, msgId, sd, format, a...)
 }
 
 func Debug(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
+	if l == nil {
+		return
+	}
 	l.Log(DEBUG, msgId, sd, format, a...)
 }
