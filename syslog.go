@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package syslog generates syslog messages.
+// Package syslog provides logger that generates syslog
+// messages as defined in RFC 5424.
 package syslog
 
 import (

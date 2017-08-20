@@ -4,7 +4,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/szxp/syslog)](https://goreportcard.com/report/github.com/szxp/syslog)
 
 # syslog
-Syslog message formatter.
+Syslog package provides logger that generates syslog 
+messages as defined in RFC 5424.
 
 
 ## Example Writer
