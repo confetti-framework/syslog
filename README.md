@@ -22,12 +22,12 @@ func main() {
 	l := syslog.NewLogger(buf, syslog.USER, "hostname", "appName", "procid")
 
 	// without structured data
-	l.Log(syslog.INFO, "ImageUploaded", nil, "image uploaded by %s: %s", "username", "image.jpg")
+	syslog.Info(l, "ImageUploaded", nil, "image uploaded by %s: %s", "username", "image.jpg")
 
 	// with structured data
 	sd := syslog.StructuredData{}
 	sd.Element("id1").Set("par1", "val1")
-	l.Log(syslog.ERR, "LoginFailed", sd, "login failed: %s", "username")
+	syslog.Error(l, "LoginFailed", sd, "login failed: %s", "username")
 
 	fmt.Print(buf.String())
 
