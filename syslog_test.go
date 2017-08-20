@@ -22,7 +22,26 @@ func TestWriter(t *testing.T) {
 	logger.Println(msg)
 
 	if !strings.HasSuffix(buf.String(), msg+"\n") {
-		t.Fatalf("non expected msg suffix: %q", buf.String())
+		t.Fatalf("non-expected msg suffix: %s", buf.String())
+	}
+}
+
+func TestLogger(t *testing.T) {
+	buf := &bytes.Buffer{}
+	l := syslog.NewLogger(buf, "hostname", "appName", "procid")
+
+	sd := syslog.StructuredData{}
+	sd.Element("id1").Set("par1", "val1")
+	l.Log(syslog.USER|syslog.ERR, "LoginFailed", sd, "login failed: %s", "username")
+
+	expectedPrefix := "<11>1"
+	if !strings.HasPrefix(buf.String(), expectedPrefix) {
+		t.Fatalf("non-expected prefix: %s", buf.String())
+	}
+
+	expectedSuffix := "appName procid LoginFailed [id1 par1=\"val1\"] login failed: username\n"
+	if !strings.HasSuffix(buf.String(), expectedSuffix) {
+		t.Fatalf("non-expected suffix: %s", buf.String())
 	}
 }
 

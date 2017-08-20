@@ -128,20 +128,95 @@ func (w *writer) format(d []byte) []byte {
 	return buf.Bytes()
 }
 
-type Logger interface {
-	Log(sev Priority, msgId string, sd StructuredData, format string, a ...interface{})
+func formatSyslog(
+	pri Priority,
+	timestamp time.Time,
+	timeFormat string,
+	hostname string,
+	appName string,
+	procid string,
+	msgid string,
+	structData StructuredData,
+	msg string,
+) []byte {
+	if timeFormat == "" {
+		timeFormat = rfc3339Milli
+	}
+
+	ts := timestamp.Format(timeFormat)
+	hostname = defaultIfEmpty(hostname, "-")
+	appName = defaultIfEmpty(appName, "-")
+	procid = defaultIfEmpty(procid, "-")
+	msgid = defaultIfEmpty(msgid, "-")
+
+	sd := ""
+	if structData != nil {
+		sd = structData.String()
+	}
+	sd = defaultIfEmpty(sd, "-")
+
+	buf := &bytes.Buffer{}
+	fmt.Fprintf(buf, "<%d>%d %s %s %s %s %s %s %s",
+		pri,
+		version,
+		ts,
+		hostname,
+		appName,
+		procid,
+		msgid,
+		sd,
+		msg,
+	)
+
+	if msg[len(msg)-1] != '\n' {
+		buf.WriteByte('\n')
+	}
+	return buf.Bytes()
 }
 
-func NewLogger(w io.Writer) Logger {
-	return &logger{w}
+func defaultIfEmpty(s, def string) string {
+	if s == "" {
+		return def
+	}
+	return s
+}
+
+// Logger generates syslog messages.
+type Logger interface {
+
+	// Log generates a syslog message.
+	Log(sev Priority, msgId string, sd StructuredData, msgFormat string, a ...interface{})
+}
+
+// NewLogger returns a new syslog logger that writes to
+// the specified io.Writer.
+func NewLogger(w io.Writer, hostname, appName, procid string) Logger {
+	return &logger{
+		w,
+		hostname,
+		appName,
+		procid,
+	}
 }
 
 type logger struct {
-	w io.Writer
+	w        io.Writer
+	hostname string
+	appName  string
+	procid   string
 }
 
-func (l *logger) Log(sev Priority, msgId string, sd StructuredData, format string, a ...interface{}) {
-
+func (l *logger) Log(pri Priority, msgId string, sd StructuredData, msgFormat string, a ...interface{}) {
+	l.w.Write(formatSyslog(
+		pri,
+		time.Now(),
+		"",
+		l.hostname,
+		l.appName,
+		l.procid,
+		msgId,
+		sd,
+		fmt.Sprintf(msgFormat, a...)))
 }
 
 // StructuredData provides a mechanism to express information in a well
