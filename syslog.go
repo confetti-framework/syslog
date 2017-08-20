@@ -144,8 +144,19 @@ func (l *logger) Log(sev Priority, msgId string, sd StructuredData, format strin
 
 }
 
+// StructuredData provides a mechanism to express information in a well
+// defined, easily parseable and interpretable data format. There are
+// multiple usage scenarios.  For example, it may express meta-
+// information about the syslog message or application-specific
+// information such as traffic counters or IP addresses.
+//
+// StructuredData can contain zero, one, or multiple structured data
+// elements, which are referred to as SDElement.
 type StructuredData map[string]SDElement
 
+// Element returns an SDElement associated with the given id.
+// If an element with the id does not exist a new SDElement
+// will be created.
 func (d StructuredData) Element(id string) SDElement {
 	elem, ok := d[id]
 	if !ok {
@@ -155,6 +166,7 @@ func (d StructuredData) Element(id string) SDElement {
 	return elem
 }
 
+// Ids returns the ids of the SDElements in lexicographical order.
 func (d StructuredData) Ids() []string {
 	ids := make([]string, 0, len(d))
 	for id := range d {
@@ -166,6 +178,7 @@ func (d StructuredData) Ids() []string {
 	return ids
 }
 
+// Strings returns the string representation of the structured data.
 func (d StructuredData) String() string {
 	r := strings.NewReplacer(`"`, `\"`, `\`, `\\`, `]`, `\]`)
 	buf := &bytes.Buffer{}
@@ -174,7 +187,7 @@ func (d StructuredData) String() string {
 		if len(elem) > 0 {
 			buf.WriteByte('[')
 			buf.WriteString(id)
-			for _, name := range elem.Keys() {
+			for _, name := range elem.Names() {
 				buf.WriteByte(' ')
 				fmt.Fprintf(buf, `%s="%s"`, name, r.Replace(elem[name]))
 			}
@@ -184,13 +197,17 @@ func (d StructuredData) String() string {
 	return buf.String()
 }
 
+// SDElement represents a structured data element and consists
+// name-value pairs.
 type SDElement map[string]string
 
+// Set sets a value associated with the specified name.
 func (e SDElement) Set(name, value string) SDElement {
 	e[name] = value
 	return e
 }
 
+// Get returns a value associated with the specified name.
 func (e SDElement) Get(name string) string {
 	value, ok := e[name]
 	if !ok {
@@ -199,13 +216,14 @@ func (e SDElement) Get(name string) string {
 	return value
 }
 
-func (e SDElement) Keys() []string {
-	keys := make([]string, 0, len(e))
-	for key := range e {
-		keys = append(keys, key)
+// Names returns the parameter names in lexicographical order.
+func (e SDElement) Names() []string {
+	names := make([]string, 0, len(e))
+	for name := range e {
+		names = append(names, name)
 	}
-	sort.Strings(keys)
-	return keys
+	sort.Strings(names)
+	return names
 }
 
 func Alert(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
