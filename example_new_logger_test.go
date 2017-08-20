@@ -10,7 +10,7 @@ import (
 	"github.com/szxp/syslog"
 )
 
-func ExampleNewLogger() {
+func Example_NewLogger() {
 	buf := &bytes.Buffer{}
 	l := syslog.NewLogger(buf, "hostname", "appName", "procid")
 
