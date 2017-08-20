@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -145,26 +146,37 @@ func (l *logger) Log(sev Priority, msgId string, sd StructuredData, format strin
 
 type StructuredData map[string]SDElement
 
-func (b StructuredData) Element(id string) SDElement {
-	elem, ok := b[id]
+func (d StructuredData) Element(id string) SDElement {
+	elem, ok := d[id]
 	if !ok {
 		elem = make(SDElement, 1)
-		b[id] = elem
+		d[id] = elem
 	}
 	return elem
 }
 
-func (b StructuredData) String() string {
-	r := strings.NewReplacer(`"`, `\"`, `\`, `\\`, `]`, `\]`)
+func (d StructuredData) Ids() []string {
+	ids := make([]string, 0, len(d))
+	for id := range d {
+		if len(d[id]) > 0 {
+			ids = append(ids, id)
+		}
+	}
+	sort.Strings(ids)
+	return ids
+}
 
+func (d StructuredData) String() string {
+	r := strings.NewReplacer(`"`, `\"`, `\`, `\\`, `]`, `\]`)
 	buf := &bytes.Buffer{}
-	for id, elem := range b {
+	for _, id := range d.Ids() {
+		elem := d[id]
 		if len(elem) > 0 {
 			buf.WriteByte('[')
 			buf.WriteString(id)
-			for name, val := range elem {
+			for _, name := range elem.Keys() {
 				buf.WriteByte(' ')
-				fmt.Fprintf(buf, `%s="%s"`, name, r.Replace(val))
+				fmt.Fprintf(buf, `%s="%s"`, name, r.Replace(elem[name]))
 			}
 			buf.WriteByte(']')
 		}
@@ -174,9 +186,26 @@ func (b StructuredData) String() string {
 
 type SDElement map[string]string
 
-func (e SDElement) Data(name, value string) SDElement {
+func (e SDElement) Set(name, value string) SDElement {
 	e[name] = value
 	return e
+}
+
+func (e SDElement) Get(name string) string {
+	value, ok := e[name]
+	if !ok {
+		return ""
+	}
+	return value
+}
+
+func (e SDElement) Keys() []string {
+	keys := make([]string, 0, len(e))
+	for key := range e {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 func Alert(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
