@@ -24,6 +24,11 @@ func TestWriter(t *testing.T) {
 	logger := log.New(wrappedBuf, "", 0)
 	logger.Println(msg)
 
+	expectedPrefix := "<13>1"
+	if !strings.HasPrefix(buf.String(), expectedPrefix) {
+		t.Fatalf("non-expected prefix: %s", buf.String())
+	}
+
 	if !strings.HasSuffix(buf.String(), msg+"\n") {
 		t.Fatalf("non-expected msg suffix: %s", buf.String())
 	}
@@ -31,11 +36,11 @@ func TestWriter(t *testing.T) {
 
 func TestLogger(t *testing.T) {
 	buf := &bytes.Buffer{}
-	l := syslog.NewLogger(buf, "hostname", "appName", "procid")
+	l := syslog.NewLogger(buf, syslog.USER, "hostname", "appName", "procid")
 
 	sd := syslog.StructuredData{}
 	sd.Element("id1").Set("par1", "val1")
-	l.Log(syslog.USER|syslog.ERR, "LoginFailed", sd, "login failed: %s", "username")
+	l.Log(syslog.ERR, "LoginFailed", sd, "login failed: %s", "username")
 
 	expectedPrefix := "<11>1"
 	if !strings.HasPrefix(buf.String(), expectedPrefix) {

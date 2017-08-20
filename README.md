@@ -19,11 +19,11 @@ import (
 
 func main() {
 	buf := &bytes.Buffer{}
-	l := syslog.NewLogger(buf, "hostname", "appName", "procid")
+	l := syslog.NewLogger(buf, syslog.USER, "hostname", "appName", "procid")
 
 	sd := syslog.StructuredData{}
 	sd.Element("id1").Set("par1", "val1")
-	l.Log(syslog.USER|syslog.ERR, "LoginFailed", sd, "login failed: %s", "username")
+	l.Log(syslog.ERR, "LoginFailed", sd, "login failed: %s", "username")
 
 	fmt.Print(buf.String())
 

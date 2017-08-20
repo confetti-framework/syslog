@@ -181,17 +181,18 @@ func defaultIfEmpty(s, def string) string {
 type Logger interface {
 
 	// Log generates a syslog message.
-	Log(sev Priority, msgId string, sd StructuredData, msgFormat string, a ...interface{})
+	Log(severity Priority, msgId string, sd StructuredData, msgFormat string, a ...interface{})
 }
 
 // NewLogger returns a new syslog logger that writes to
 // the specified io.Writer.
 // The returned Logger is safe for concurrent use by
 // multiple goroutines.
-func NewLogger(w io.Writer, hostname, appName, procid string) Logger {
+func NewLogger(w io.Writer, facility Priority, hostname, appName, procid string) Logger {
 	return &logger{
 		sync.Mutex{},
 		w,
+		facility,
 		hostname,
 		appName,
 		procid,
@@ -201,18 +202,19 @@ func NewLogger(w io.Writer, hostname, appName, procid string) Logger {
 type logger struct {
 	mu       sync.Mutex
 	w        io.Writer
+	facility Priority
 	hostname string
 	appName  string
 	procid   string
 }
 
-func (l *logger) Log(pri Priority, msgId string, sd StructuredData, msgFormat string, a ...interface{}) {
+func (l *logger) Log(severity Priority, msgId string, sd StructuredData, msgFormat string, a ...interface{}) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
 	msg := fmt.Sprintf(msgFormat, a...)
 	l.w.Write(formatSyslog(
-		pri,
+		Priority(l.facility|severity),
 		time.Now(),
 		"",
 		l.hostname,
