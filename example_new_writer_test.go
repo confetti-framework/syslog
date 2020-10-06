@@ -5,7 +5,7 @@
 package syslog_test
 
 import (
-	"github.com/szxp/syslog"
+	"github.com/lanvard/syslog"
 	"log"
 	"os"
 )
