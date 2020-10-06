@@ -164,7 +164,7 @@ func formatSyslog(
 	)
 	buf.Write(msg)
 
-	if msg[len(msg)-1] != '\n' {
+	if len(msg) > 0 && msg[len(msg)-1] != '\n' {
 		buf.WriteByte('\n')
 	}
 	return buf.Bytes()
