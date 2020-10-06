@@ -7,7 +7,7 @@ package syslog_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/szxp/syslog"
+	"github.com/lanvard/syslog"
 )
 
 func ExampleNewLogger() {
