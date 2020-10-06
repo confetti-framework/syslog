@@ -362,3 +362,26 @@ func Debug(l Logger, msgId string, sd StructuredData, format string, a ...interf
 	}
 	l.Log(DEBUG, msgId, sd, format, a...)
 }
+
+func keyBySeverity(severity syslog.Priority) string {
+	switch severity {
+	case syslog.EMERG:
+		return "emerg"
+	case syslog.ALERT:
+		return "alert"
+	case syslog.CRIT:
+		return "crit"
+	case syslog.ERR:
+		return "err"
+	case syslog.WARNING:
+		return "warning"
+	case syslog.NOTICE:
+		return "notice"
+	case syslog.INFO:
+		return "info"
+	case syslog.DEBUG:
+		return "debug"
+	default:
+		return "notice"
+	}
+}
