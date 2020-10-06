@@ -164,7 +164,7 @@ func formatSyslog(
 	)
 	buf.Write(msg)
 
-	if len(msg) > 0 && msg[len(msg)-1] != '\n' {
+	if len(msg) == 0 || msg[len(msg)-1] != '\n' {
 		buf.WriteByte('\n')
 	}
 	return buf.Bytes()
@@ -363,23 +363,23 @@ func Debug(l Logger, msgId string, sd StructuredData, format string, a ...interf
 	l.Log(DEBUG, msgId, sd, format, a...)
 }
 
-func keyBySeverity(severity syslog.Priority) string {
+func KeyBySeverity(severity Priority) string {
 	switch severity {
-	case syslog.EMERG:
+	case EMERG:
 		return "emerg"
-	case syslog.ALERT:
+	case ALERT:
 		return "alert"
-	case syslog.CRIT:
+	case CRIT:
 		return "crit"
-	case syslog.ERR:
+	case ERR:
 		return "err"
-	case syslog.WARNING:
+	case WARNING:
 		return "warning"
-	case syslog.NOTICE:
+	case NOTICE:
 		return "notice"
-	case syslog.INFO:
+	case INFO:
 		return "info"
-	case syslog.DEBUG:
+	case DEBUG:
 		return "debug"
 	default:
 		return "notice"
