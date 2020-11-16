@@ -6,21 +6,22 @@ package syslog_test
 
 import (
 	"bytes"
-	"github.com/szxp/syslog"
+	"github.com/lanvard/syslog"
+	"github.com/lanvard/syslog/log_level"
 	"log"
 	"reflect"
 	"strings"
 	"testing"
 )
 
-func TestWriter(t *testing.T) {
+func Test_writer(t *testing.T) {
 	const msg = "this is the message details"
 
 	buf := &bytes.Buffer{}
 	hostname := "laptop"
 	appName := "testapp"
 	procid := "123"
-	wrappedBuf := syslog.NewWriter(buf, syslog.USER|syslog.NOTICE, hostname, appName, procid)
+	wrappedBuf := syslog.NewWriter(buf, syslog.USER|log_level.NOTICE, hostname, appName, procid)
 	logger := log.New(wrappedBuf, "", 0)
 	logger.Println(msg)
 
@@ -34,13 +35,13 @@ func TestWriter(t *testing.T) {
 	}
 }
 
-func TestLogger(t *testing.T) {
+func Test_logger(t *testing.T) {
 	buf := &bytes.Buffer{}
 	l := syslog.NewLogger(buf, syslog.USER, "hostname", "appName", "procid")
 
 	sd := syslog.StructuredData{}
 	sd.Element("id1").Set("par1", "val1")
-	l.Log(syslog.ERR, "LoginFailed", sd, "login failed: %s", "username")
+	l.Log(log_level.ERROR, "LoginFailed", sd, "login failed: %s", "username")
 
 	expectedPrefix := "<11>1"
 	if !strings.HasPrefix(buf.String(), expectedPrefix) {
@@ -53,7 +54,7 @@ func TestLogger(t *testing.T) {
 	}
 }
 
-func TestStructuredData(t *testing.T) {
+func Test_structured_data(t *testing.T) {
 	sd := syslog.StructuredData{}
 	sd.Element("id1").
 		Set("par1", "\"val1\"").

@@ -19,11 +19,10 @@ import (
 // The Priority is a combination of the syslog facility and
 // severity. For example, USER | NOTICE.
 type Priority int
+type Facility = Priority
 
 const (
-	// Severity.
-
-	// From /usr/include/sys/syslog.h.
+	// Level/severity
 	// These are the same on Linux, BSD, and OS X.
 	EMERG Priority = iota
 	ALERT
@@ -36,7 +35,7 @@ const (
 )
 
 const (
-	// Facility.
+	// Facility
 
 	// From /usr/include/sys/syslog.h.
 	// These are the same up to FTP on Linux, BSD, and OS X.

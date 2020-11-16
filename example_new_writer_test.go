@@ -6,6 +6,7 @@ package syslog_test
 
 import (
 	"github.com/lanvard/syslog"
+	"github.com/lanvard/syslog/log_level"
 	"log"
 	"os"
 )
@@ -16,7 +17,7 @@ func ExampleNewWriter() {
 	hostname := "laptop"
 	appName := "testapp"
 	procid := "123"
-	wrappedWriter := syslog.NewWriter(os.Stdout, syslog.USER|syslog.NOTICE, hostname, appName, procid)
+	wrappedWriter := syslog.NewWriter(os.Stdout, syslog.USER|log_level.NOTICE, hostname, appName, procid)
 	logger := log.New(wrappedWriter, "", 0)
 	logger.Println(msg)
 
