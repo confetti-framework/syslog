@@ -1,3 +1,3 @@
-module github.com/lanvard/syslog
+module github.com/confetti-framework/syslog
 
 go 1.15

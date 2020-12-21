@@ -1,6 +1,6 @@
 package log_level
 
-import "github.com/lanvard/syslog"
+import "github.com/confetti-framework/syslog"
 
 type Level = syslog.Priority // severity
 

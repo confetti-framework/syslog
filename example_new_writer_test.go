@@ -5,8 +5,8 @@
 package syslog_test
 
 import (
-	"github.com/lanvard/syslog"
-	"github.com/lanvard/syslog/log_level"
+	"github.com/confetti-framework/syslog"
+	"github.com/confetti-framework/syslog/log_level"
 	"log"
 	"os"
 )

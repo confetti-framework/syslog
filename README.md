@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/szxp/syslog.svg?branch=master)](https://travis-ci.org/szxp/syslog)
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/szxp/syslog?branch=master&svg=true)](https://ci.appveyor.com/project/szxp/syslog)
-[![GoDoc](https://godoc.org/github.com/lanvard/syslog?status.svg)](https://godoc.org/github.com/lanvard/syslog)
-[![Go Report Card](https://goreportcard.com/badge/github.com/lanvard/syslog)](https://goreportcard.com/report/github.com/lanvard/syslog)
+[![GoDoc](https://godoc.org/github.com/confetti-framework/syslog?status.svg)](https://godoc.org/github.com/confetti-framework/syslog)
+[![Go Report Card](https://goreportcard.com/badge/github.com/confetti-framework/syslog)](https://goreportcard.com/report/github.com/confetti-framework/syslog)
 
 # syslog
 Syslog package provides logger that generates syslog 
@@ -13,7 +13,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/lanvard/syslog"
+	"github.com/confetti-framework/syslog"
 	"os"
 )
 
@@ -43,7 +43,7 @@ func main() {
 package main
 
 import (
-	"github.com/lanvard/syslog"
+	"github.com/confetti-framework/syslog"
 	"log"
 	"os"
 )
