@@ -9,6 +9,7 @@ package syslog
 import (
 	"bytes"
 	"fmt"
+	"github.com/confetti-framework/syslog/log_level"
 	"io"
 	"sort"
 	"strings"
@@ -16,30 +17,14 @@ import (
 	"time"
 )
 
-// The Priority is a combination of the syslog facility and
-// severity. For example, USER | NOTICE.
-type Priority int
-type Facility = Priority
-
-const (
-	// Level/severity
-	// These are the same on Linux, BSD, and OS X.
-	EMERG Priority = iota
-	ALERT
-	CRIT
-	ERR
-	WARNING
-	NOTICE
-	INFO
-	DEBUG
-)
+type Facility = log_level.Priority
 
 const (
 	// Facility
 
 	// From /usr/include/sys/syslog.h.
 	// These are the same up to FTP on Linux, BSD, and OS X.
-	KERN Priority = iota << 3
+	KERN log_level.Priority = iota << 3
 	USER
 	MAIL
 	DAEMON
@@ -72,7 +57,7 @@ const version = 1 // defined in RFC 5424.
 // in RFC 5424 and writes them to the given io.Writer.
 // The returned io.Writer is NOT safe for concurrent use
 // by multiple goroutines.
-func NewWriter(out io.Writer, pri Priority, hostname, appName, procid string) io.Writer {
+func NewWriter(out io.Writer, pri log_level.Priority, hostname, appName, procid string) io.Writer {
 	return &writer{
 		out,
 		pri,
@@ -85,7 +70,7 @@ func NewWriter(out io.Writer, pri Priority, hostname, appName, procid string) io
 // Writer generates syslog messages as defined in RFC 5424.
 type writer struct {
 	out      io.Writer
-	pri      Priority
+	pri      log_level.Priority
 	hostname string
 	appName  string
 	procid   string
@@ -124,7 +109,7 @@ func (w *writer) Write(d []byte) (int, error) {
 const rfc3339Milli = "2006-01-02T15:04:05.999-07:00"
 
 func formatSyslog(
-	pri Priority,
+	pri log_level.Priority,
 	timestamp time.Time,
 	timeFormat string,
 	hostname string,
@@ -180,14 +165,14 @@ func defaultIfEmpty(s, def string) string {
 type Logger interface {
 
 	// Log generates a syslog message.
-	Log(severity Priority, msgId string, sd StructuredData, msgFormat string, a ...interface{})
+	Log(severity log_level.Priority, msgId string, sd StructuredData, msgFormat string, a ...interface{})
 }
 
 // NewLogger returns a new syslog logger that writes to
 // the specified io.Writer.
 // The returned Logger is safe for concurrent use by
 // multiple goroutines.
-func NewLogger(w io.Writer, facility Priority, hostname, appName, procid string) Logger {
+func NewLogger(w io.Writer, facility log_level.Priority, hostname, appName, procid string) Logger {
 	return &logger{
 		sync.Mutex{},
 		w,
@@ -201,19 +186,19 @@ func NewLogger(w io.Writer, facility Priority, hostname, appName, procid string)
 type logger struct {
 	mu       sync.Mutex
 	w        io.Writer
-	facility Priority
+	facility log_level.Priority
 	hostname string
 	appName  string
 	procid   string
 }
 
-func (l *logger) Log(severity Priority, msgId string, sd StructuredData, msgFormat string, a ...interface{}) {
+func (l *logger) Log(severity log_level.Priority, msgId string, sd StructuredData, msgFormat string, a ...interface{}) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
 	msg := fmt.Sprintf(msgFormat, a...)
 	l.w.Write(formatSyslog(
-		Priority(l.facility|severity),
+		log_level.Priority(l.facility|severity),
 		time.Now(),
 		"",
 		l.hostname,
@@ -310,75 +295,75 @@ func Emergency(l Logger, msgId string, sd StructuredData, format string, a ...in
 	if l == nil {
 		return
 	}
-	l.Log(EMERG, msgId, sd, format, a...)
+	l.Log(log_level.EMERGENCY, msgId, sd, format, a...)
 }
 
 func Critical(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
 	if l == nil {
 		return
 	}
-	l.Log(CRIT, msgId, sd, format, a...)
+	l.Log(log_level.CRITICAL, msgId, sd, format, a...)
 }
 
 func Alert(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
 	if l == nil {
 		return
 	}
-	l.Log(ALERT, msgId, sd, format, a...)
+	l.Log(log_level.ALERT, msgId, sd, format, a...)
 }
 
 func Error(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
 	if l == nil {
 		return
 	}
-	l.Log(ERR, msgId, sd, format, a...)
+	l.Log(log_level.ERROR, msgId, sd, format, a...)
 }
 
 func Warning(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
 	if l == nil {
 		return
 	}
-	l.Log(WARNING, msgId, sd, format, a...)
+	l.Log(log_level.WARNING, msgId, sd, format, a...)
 }
 
 func Notice(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
 	if l == nil {
 		return
 	}
-	l.Log(NOTICE, msgId, sd, format, a...)
+	l.Log(log_level.NOTICE, msgId, sd, format, a...)
 }
 
 func Info(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
 	if l == nil {
 		return
 	}
-	l.Log(INFO, msgId, sd, format, a...)
+	l.Log(log_level.INFO, msgId, sd, format, a...)
 }
 
 func Debug(l Logger, msgId string, sd StructuredData, format string, a ...interface{}) {
 	if l == nil {
 		return
 	}
-	l.Log(DEBUG, msgId, sd, format, a...)
+	l.Log(log_level.DEBUG, msgId, sd, format, a...)
 }
 
-func KeyBySeverity(severity Priority) string {
+func KeyBySeverity(severity log_level.Priority) string {
 	switch severity {
-	case EMERG:
+	case log_level.EMERGENCY:
 		return "emerg"
-	case ALERT:
+	case log_level.ALERT:
 		return "alert"
-	case CRIT:
+	case log_level.CRITICAL:
 		return "crit"
-	case ERR:
+	case log_level.ERROR:
 		return "err"
-	case WARNING:
+	case log_level.WARNING:
 		return "warning"
-	case NOTICE:
+	case log_level.NOTICE:
 		return "notice"
-	case INFO:
+	case log_level.INFO:
 		return "info"
-	case DEBUG:
+	case log_level.DEBUG:
 		return "debug"
 	default:
 		return "notice"

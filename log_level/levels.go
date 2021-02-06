@@ -1,13 +1,15 @@
 package log_level
 
-import "github.com/confetti-framework/syslog"
+type Level = Priority // severity
 
-type Level = syslog.Priority // severity
+// The Priority is a combination of the syslog facility and
+// severity. For example, USER | NOTICE.
+type Priority int
 
+// Level/severity
+// These are the same on Linux, BSD, and OS X.
 const (
-	// Level/severity
-	// These are the same on Linux, BSD, and OS X.
-	EMERGENCY syslog.Priority = iota
+	EMERGENCY Priority = iota
 	ALERT
 	CRITICAL
 	ERROR
