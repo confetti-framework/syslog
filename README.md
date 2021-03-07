@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/confetti-framework/syslog/branch/main/graph/badge.svg?token=CZOT2GFEH4)](https://codecov.io/gh/confetti-framework/syslog)
+
 # Syslog
 Syslog package provides logger that generates syslog 
 messages as defined in RFC 5424.
